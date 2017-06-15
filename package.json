@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "start": "webpack-dev-server --inline"
+  },
+
   "name": "github-stats-preact",
   "version": "1.0.0",
   "description": "A simle Preact app with Github API",
