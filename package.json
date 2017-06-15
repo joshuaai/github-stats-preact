@@ -1,0 +1,9 @@
+{
+  "name": "github-stats-preact",
+  "version": "1.0.0",
+  "description": "A simle Preact app with Github API",
+  "main": "index.js",
+  "repository": "https://github.com/joshuaai/github-stats-preact.git",
+  "author": "Joshua Ihejiamaizu",
+  "license": "MIT"
+}
