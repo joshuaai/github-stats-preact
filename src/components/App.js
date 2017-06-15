@@ -23,13 +23,13 @@ export class App extends Component {
     })
   }
 
-  render() {
+  render({config}, {loading, user}) {
     return (
       <div class="app">
-        { this.state.loading 
-          ? <p>Getting your info..</p> 
-          : <User name={this.state.user.name} 
-                  image={this.state.user.avatar_url} /> 
+        { loading 
+          ? <p>Getting {config.urls.user}.</p> 
+          : <User name={user.name} 
+                  image={user.avatar_url} /> 
         }
       </div>
     );

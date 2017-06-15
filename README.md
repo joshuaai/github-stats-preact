@@ -101,9 +101,12 @@ export class App extends Component {
     fetch(this.props.config.urls.user)
       .then(resp => resp.json())
       .then(user => {
-        this.setState({
-          user,
-          loading: false
+        setTimeout(() => {
+          this.setState({
+            user,
+            loading: false
+          });
+        }, 2000)
       })
       .catch(err => console.error(err));
     })
@@ -126,3 +129,20 @@ export default App;
 ```
 
 We get the component's props from the `index.js` file config function and we pass props from this component to the `User` component inside the render method.
+
+## Passing State and Props in Component render() Function
+Instead of always calling `this.state` like in React, in Preact, the render method can take `props` and `state` as arguments and eliminate the need for `this.state` in the render() function. The `App.js` render method is then:
+```js
+render({config}, {loading, user}) {
+  return (
+    <div class="app">
+      { loading 
+        ? <p>Getting {config.urls.user}</p> 
+        : <User name={user.name} 
+                image={user.avatar_url} /> 
+      }
+    </div>
+  );
+}
+```
+In the code above, we only get what we need from the state as an object, `{loading, user}` and from the props too as, `{config}`.
