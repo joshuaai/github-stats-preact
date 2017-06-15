@@ -1,5 +1,6 @@
 import { h, Component } from 'preact';
-import User from './User'
+import User from './User';
+import FormComponent from './Form';
 
 export class App extends Component {
   constructor(props) {
@@ -31,6 +32,7 @@ export class App extends Component {
           : <User name={user.name} 
                   image={user.avatar_url} /> 
         }
+        <FormComponent />
       </div>
     );
   }

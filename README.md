@@ -146,3 +146,49 @@ render({config}, {loading, user}) {
 }
 ```
 In the code above, we only get what we need from the state as an object, `{loading, user}` and from the props too as, `{config}`.
+
+## Use Link State to Automatically Handle State Changes
+When building components that contain forms, we can use the components internal state to track the value of those form fields. The component, and not  the DOM, then becomes the source of truth always for the input data.
+
+Typically in React, we will write this like so in `Form.js`:
+```js
+import { h, Component } from 'preact';
+import linkState from 'limkstate';
+
+export class Form extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { text: "" };
+    this.setText = this.setState.bind(this);
+    this.submit = this.submit.bind(this);
+  }
+
+  setText(e) {
+    this.setState({
+      text: e.target.value
+    })
+  }
+
+  submit() {
+    console.log(this.state.text);
+  }
+
+  render(props, { text = ''}) {
+    return (
+      <div>
+        <form onSubmit={this.submit} action="javascript:" >
+          <input type="text" value={this.state.text} 
+                 onInput={ linkState(this, 'text') } />
+        </form>
+        <pre><code>{JSON.stringify(this.state, null, 2)}</code></pre>
+      </div>
+    )
+  }
+}
+```
+
+However, the `Link` state in Preact allows us eliminate a lot of the code above, by passing props and state to the render method.
+* We de-structure the state by creating a empty `text` attribute in it.
+* We install the Preact `linkstate` package with `yarn add linkstate` and import `linkState` in our component.
+* In the `onInput` method, we pass the component, `this` and the state property we want, `text` to the linkState() method.
+

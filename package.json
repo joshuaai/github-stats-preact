@@ -2,10 +2,9 @@
   "scripts": {
     "start": "webpack-dev-server --inline"
   },
-
   "name": "github-stats-preact",
   "version": "1.0.0",
-  "description": "A simle Preact app with Github API",
+  "description": "A simple Preact app with Github API",
   "main": "index.js",
   "repository": "https://github.com/joshuaai/github-stats-preact.git",
   "author": "Joshua Ihejiamaizu",
@@ -15,10 +14,13 @@
     "babel-loader": "^7.0.0",
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-preset-env": "^1.5.2",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
     "webpack": "^2.6.1",
     "webpack-dev-server": "^2.4.5"
   },
   "dependencies": {
+    "linkstate": "^1.0.0",
     "preact": "^8.1.0"
   }
 }
