@@ -30,3 +30,37 @@ path.join(__dirname, 'build')
 Run `./node_modules/.bin/webpack` or `node_modules\.bin\webpack` for windows at this point to see that the bundle file is generated inside a build directory.
 
 * *transformations* - under the `module` key we provide `rules` and an object for the configuration of our loader.  
+
+## Define Functional Components
+Functional components receive `props` arguments and returns `jsx` - it does not maintain any internal state therefore. This is used for static components such as the `User.js`:
+```js
+import { h } from 'preact';
+
+export function User(props) {
+  return (
+    <div class="user">
+      <figure class="user__image">
+        <img src={props.image} />
+      </figure>
+      <p class="user__name">{props.name}</p>
+    </div>
+  );
+}
+
+export default User;
+```
+Now pass the props as simple attributes in the container component, `App.js`:
+```js
+import { h } from 'preact';
+import User from './User'
+
+export function App() {
+  return (
+    <div class="app">
+      <User image="hey.png" name="name" />
+    </div>
+  );
+}
+
+export default App;
+```
