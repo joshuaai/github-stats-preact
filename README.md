@@ -52,15 +52,77 @@ export default User;
 Now pass the props as simple attributes in the container component, `App.js`:
 ```js
 import { h } from 'preact';
-import User from './User'
+import User from './User';
+
+const users = [
+  {
+    image: "https://avatars1.githubusercontent.com/u/22121420?v=3&s=200",
+    name: "Joshua A I"
+  },
+  {
+    image: "https://avatars2.githubusercontent.com/u/13587838?v=3&s=200",
+    name: "Charles Agyemang"
+  }
+]
 
 export function App() {
   return (
     <div class="app">
-      <User image="hey.png" name="name" />
+      {users.map(user => <User {...user} key={user.name}/>)}
     </div>
   );
 }
 
 export default App;
 ```
+
+The spread operator `{...user}` encapsulates all the keys/props of each user object. Alternatively, we could have passed the props individually like so:
+```js
+{ users.map( user => <User name={user.name} image={user.image} /> ) }
+``` 
+
+## Define Stateful Components
+This allows us to tap into the component life cycle events and we can also use it to store some internal state. Our `App.js` now looks this way:
+```js
+import { h, Component } from 'preact';
+import User from './User'
+
+export class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      user: null,
+      loading: true
+    }
+  }
+
+  componentDidMount() {
+    fetch(this.props.config.urls.user)
+      .then(resp => resp.json())
+      .then(user => {
+        this.setState({
+          user,
+          loading: false
+      })
+      .catch(err => console.error(err));
+    })
+  }
+
+  render() {
+    return (
+      <div class="app">
+        { this.state.loading 
+          ? <p>Getting your info..</p> 
+          : <User name={this.state.user.name} 
+                  image={this.state.user.avatar_url} /> 
+        }
+      </div>
+    );
+  }
+}
+
+export default App;
+```
+
+We get the component's props from the `index.js` file config function and we pass props from this component to the `User` component inside the render method.
