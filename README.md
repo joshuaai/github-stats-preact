@@ -191,6 +191,17 @@ However, the `Link` state in Preact allows us eliminate a lot of the code above,
 * We de-structure the state by creating a empty `text` attribute in it.
 * We install the Preact `linkstate` package with `yarn add linkstate` and import `linkState` in our component.
 * In the `onInput` method, we pass the component, `this` and the state property we want, `text` to the linkState() method.
+Dependencies the allow this work can be installed as:
+```bash
+yarn add --dev babel-preset-es2015 babel-preset-stage-0
+```
+Then to the `webpack.config.js`, add the presets to the babel-loader:
+```js
+options: {
+  presets: ['env', 'es2015', 'stage-0'],
+  ...
+}
+```
 
 ## React App to Preact
 This will reduce the size of the app. If using `create-react-app`, run:
@@ -208,3 +219,116 @@ In the `webpack.config.dev.js` and `webpack.config.prod.js` files in the `config
 ```
 The above causes Webpack to use Preact as the alias for react and react-dom wherever they are imported. This reduces the generated bundle file size by just over 70%. The removed code is basically the react library and its dependencies.
 
+## Simple Routing with Preact Router
+```bash
+yarn add preact-router
+```
+The components look this way with `preact-router`:
+
+*App.js*
+```js
+import { h, Component } from 'preact';
+import { Router } from 'preact-router';
+import Home from './Home'; 
+import Profile from './Profile';
+
+export class App extends Component {
+  render() {
+    return (
+      <div class="app">
+        <Router>
+          <Home path="/" />
+          <Profile path="/profile/:user" />
+        </Router>
+      </div>
+    );
+  }
+}
+
+export default App;
+```
+
+*Home.js*
+```js
+import { h } from 'preact';
+import { route } from 'preact-router';
+
+function search(query) {
+  //encode the query so it is a valid URL
+  route(`/profile/${encodeURIComponent(query)}`);
+}
+
+export default function Home() {
+  return (
+    <section>
+      <p>Enter a Github Username</p>
+      <input type="search"
+             placeholder="eg: joshuaai"
+             onSearch={ e => search(e.target.value) } 
+      />
+    </section>
+  )
+}
+```
+
+*Profile.js*
+```js
+import { h, Component } from 'preact';
+import User from './User';
+
+export class Profile extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      user: null,
+      loading: true
+    }
+  }
+
+  componentDidMount() {
+    fetch(`https://api.github.com/users/${this.props.user}`)
+      .then( resp => resp.json() )
+      .then( user => {
+        this.setState({
+          user,
+          loading: false
+        });
+      })
+      .catch( err => console.error(err) );
+  }
+
+  render( {}, {loading, user} ) {
+    return (
+      <div class="app">
+        { loading 
+          ? <p>Fetching...</p>
+          : <User image={user.avatar_url}
+                  name={user.name} />
+        }
+      </div>
+    )
+  }
+}
+
+export default Profile;
+```
+
+In handling unmatched routes, we can add an `Error.js` component:
+```js
+import { h } from 'preact';
+
+export default function Error() {
+  return (
+    <div>
+      <p>Error!</p>
+      <p><a href="/">Home</a></p>
+    </div>
+  )
+}
+```
+and set it as the default in the `App` component like so: 
+```js
+<ErrorComponent default />
+```
+This will render the `Error` component for every unmatched route.
