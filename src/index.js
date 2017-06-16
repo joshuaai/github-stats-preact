@@ -1,10 +1,17 @@
 import { h, render } from 'preact';
+import { Provider } from 'preact-redux';
+import thunk from 'redux-thunk';
+import { createStore, applyMiddleware } from 'redux';
+
+import reducer from './reducer';
 import App from './components/App';
 
-const config = {
-  urls: {
-    user: "https://api.github.com/users/joshuaai"
-  }
-}
+const store = createStore(reducer, { loading: true, user: null}, applyMiddleware(thunk));
 
-render(<App config={config} />, document.querySelector('main'));
+render((
+  <div>
+    <Provider store={store} >
+      <App />
+    </Provider>
+  </div>
+), document.querySelector('main'));

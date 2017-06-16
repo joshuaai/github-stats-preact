@@ -434,3 +434,133 @@ export default function Error() {
   )
 }
 ```
+
+## Integrate Redux with Preact
+Preact has a `preact-redux` package which is a simple wrapper around the main `react-redux` package.
+
+We will refactor the `Profile.js` component to no longer use internal state, and place `fetch` api call in a separate file. We will have a global store for updating state.
+
+```bash
+yarn add redux redux-thunk preact-redux
+```
+The `redux-thunk` package will handle the async api calls.
+
+For the redux library to work, add the following dependencies to the `package.json` file:
+```bash
+yarn add --dev babel-plugin-transform-node-env-inline babel-preset-react babel-plugin-transform-react-remove-prop-types
+```
+
+To implement `Redux`, we add two files, `reducer.js` and `actions.js` to the root of our app.
+
+*actions.js*
+```js
+// the redux thunk gives us access to the dispatch
+// each dispatch is an action
+export function fetchUser(username) {
+  return function(dispatch) {
+    dispatch({type: "USER_FETCH"})
+    
+    fetch(`https://api.github.com/users/${username}`)
+      .then( resp => resp.json() )
+      .then( user => {
+        dispatch({type: "USER_FULFILLED", payload: user})
+      })
+      .catch( err => console.error(err) );
+  }
+}
+```
+Each dispatch is an action. The first dispatch sets the state (store) while the data is fetching using the action type `USER_FETCH`, while the second changes the state (store) using `USER_FULFILLED` when the json loading is successful.
+
+*reducer.js*
+```js
+// a reducer function that will handle updates to our store
+// the reducer takes in state and the current action and returns the state
+export default function (state, action) {
+  switch (action.type) {
+    case 'USER_FETCH':
+      return {
+        user: null,
+        loading: true
+      }
+    //when user is fetched correctly
+    case 'USER_FULFILLED':
+      return {
+        user: action.payload,
+        loading: false
+      }
+    default: return state;
+  }
+}
+```
+The reducer switches between the different actions and sets the state accordingly.
+
+In the `index.js` file, import the required files and packages and add the `provider` wrapper to the `render()` method:
+```js
+import { h, render } from 'preact';
+import { Provider } from 'preact-redux';
+import thunk from 'redux-thunk';
+import { createStore, applyMiddleware } from 'redux';
+
+import reducer from './reducer';
+import App from './components/App';
+
+// use the reducer to create the store, give it an initial state, and apply the middleware to give access to the dispatch method
+const store = createStore(reducer, { loading: true, user: null}, applyMiddleware(thunk));
+
+render((
+  <div>
+    <Provider store={store} >
+      <App />
+    </Provider>
+  </div>
+), document.querySelector('main'));
+```
+
+The `Profile.js` component which does async calls now becomes:
+```js
+import { h, Component } from 'preact';
+import { connect } from 'preact-redux';
+import User from './User';
+import { fetchUser } from '../actions';
+
+export class Profile extends Component {
+
+  componentDidMount() {
+    const username = this.props.match.params.user;
+    this.props.fetchUser(username);
+  }
+
+  render( {loading, user} ) {
+    return (
+      <div class="app">
+        { loading 
+          ? <p>Fetching...</p>
+          : <User image={user.avatar_url}
+                  name={user.name} />
+        }
+      </div>
+    );
+  }
+}
+
+const mapStateToProps = (state) => {
+  return {
+    loading: state.loading,
+    user: state.user
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    //dispatch the result of calling our thunk
+    fetchUser: (username) => dispatch(fetchUser(username))
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Profile);
+```
+The `connect` method connects the component to the redux store, and with the function that it returns we pass in the `Profile` component. 
+
+To the `connect` method, we provide two functions that will map the state to the props and the dispatch to the props of the `Profile` component's props to enable us access them. We then pass the props, `{ loading, user }` to the component's `render()` method.
+
+We then use the `fetchUser` props inside the `componentDidMount` life cycle method.
