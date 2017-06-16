@@ -32,6 +32,7 @@ export class App extends Component {
           : <User name={user.name} 
                   image={user.avatar_url} /> 
         }
+        <br />
         <FormComponent />
       </div>
     );
