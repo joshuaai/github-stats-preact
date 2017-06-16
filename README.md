@@ -192,3 +192,19 @@ However, the `Link` state in Preact allows us eliminate a lot of the code above,
 * We install the Preact `linkstate` package with `yarn add linkstate` and import `linkState` in our component.
 * In the `onInput` method, we pass the component, `this` and the state property we want, `text` to the linkState() method.
 
+## React App to Preact
+This will reduce the size of the app. If using `create-react-app`, run:
+```bash
+yarn run eject
+```
+This creates a config directory with the Webpack configuration.
+```bash
+yarn add preact preact-compat
+```
+In the `webpack.config.dev.js` and `webpack.config.prod.js` files in the `config` folder, find the `alias` key under `resolve` and add:
+```js
+'react': 'preact-compat',
+'react-dom': 'preact-compat'
+```
+The above causes Webpack to use Preact as the alias for react and react-dom wherever they are imported. This reduces the generated bundle file size by just over 70%. The removed code is basically the react library and its dependencies.
+
