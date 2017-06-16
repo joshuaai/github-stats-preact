@@ -1,5 +1,5 @@
 import { h, Component } from 'preact';
-import { Router } from 'preact-router';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import Home from './Home'; 
 import Profile from './Profile';
 import ErrorComponent from './Error';
@@ -9,9 +9,11 @@ export class App extends Component {
     return (
       <div class="app">
         <Router>
-          <Home path="/" />
-          <Profile path="/profile/:user" />
-          <ErrorComponent default />
+          <Switch>
+            <Route exact path="/" component={Home} />
+            <Route path="/profile/:user" component={Profile} />
+            <Route component={ErrorComponent} />
+          </Switch>
         </Router>
       </div>
     );

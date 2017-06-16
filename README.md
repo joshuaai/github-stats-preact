@@ -254,8 +254,10 @@ import { h } from 'preact';
 import { route } from 'preact-router';
 
 function search(query) {
-  //encode the query so it is a valid URL
-  route(`/profile/${encodeURIComponent(query)}`);
+  if (query !== "") {
+    //encode the query so it is a valid URL
+    route(`/profile/${encodeURIComponent(query)}`);
+  }
 }
 
 export default function Home() {
@@ -332,3 +334,103 @@ and set it as the default in the `App` component like so:
 <ErrorComponent default />
 ```
 This will render the `Error` component for every unmatched route.
+
+## Routing with React Router
+```bash
+yarn add preact-compat react-router-dom
+```
+Add the alias in the `webpack.config.js` file, above the `devtool` key:
+```js
+resolve: {
+  alias: {
+    'react': 'preact-compat',
+    'react-dom': 'preact-compat'
+  }
+}
+```
+The components are changed as follows:
+
+*App.js*
+```js
+import { h, Component } from 'preact';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import Home from './Home'; 
+import Profile from './Profile';
+import ErrorComponent from './Error';
+
+export class App extends Component {
+  render() {
+    return (
+      <div class="app">
+        <Router>
+          <Switch>
+            <Route exact path="/" component={Home} />
+            <Route path="/profile/:user" component={Profile} />
+            <Route component={ErrorComponent} />
+          </Switch>
+        </Router>
+      </div>
+    );
+  }
+}
+
+export default App;
+```
+
+*Home.js*
+```js
+import { h } from 'preact';
+import { withRouter } from 'react-router-dom';
+
+function search(router, query) {
+  //encode the query so it is a valid URL
+  router.history.push(`/profile/${encodeURIComponent(query)}`);
+}
+
+//const Home is the result of calling a higher order component with our component, The HOC gives us access to the router.
+const Home = withRouter((router) => {
+  return (
+    <section>
+      <p>Enter a Github Username</p>
+      <input type="search"
+             placeholder="eg: joshuaai"
+             onSearch={ e => search(router, e.target.value) } 
+      />
+    </section>
+  );
+});
+
+export default Home;
+```
+
+*Profile.js*
+```js
+componentDidMount() {
+  const username = this.props.match.params.user;
+
+  fetch(`https://api.github.com/users/${username}`)
+    .then( resp => resp.json() )
+    .then( user => {
+      this.setState({
+        user,
+        loading: false
+      });
+    })
+    .catch( err => console.error(err) );
+}
+```
+
+*Error.js*:
+```js
+import { h } from 'preact';
+import { Link } from 'react-router-dom';
+
+export default function Error() {
+  return (
+    <div>
+      <p>Error!</p>
+      <p><Link to="/">Home</Link></p>
+    </div>
+  )
+}
+```
