@@ -564,3 +564,23 @@ The `connect` method connects the component to the redux store, and with the fun
 To the `connect` method, we provide two functions that will map the state to the props and the dispatch to the props of the `Profile` component's props to enable us access them. We then pass the props, `{ loading, user }` to the component's `render()` method.
 
 We then use the `fetchUser` props inside the `componentDidMount` life cycle method.
+
+## Use Redux Dev-Tools with Preact
+Get the [Redux Dev-Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension). To add support for the Redux Chrome Dev-Tools, import the `compose()` method in `index.js`:
+```js
+import { createStore, applyMiddleware, compose } from 'redux';
+```
+
+Wrap the middleware in compose enhancers from the Dev-Tools import as follows:
+```js
+const initialState = { loading: true, user: null};
+
+const composeEnhancers =
+  typeof window === 'object' &&
+  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ?   
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
+      // Specify extension’s options like name, actionsBlacklist, actionsCreators, serialize...
+    }) : compose;
+
+const store = createStore(reducer, initialState, composeEnhancers(applyMiddleware(thunk)));
+```
